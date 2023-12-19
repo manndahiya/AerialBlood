@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,35 +6,47 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    //[SerializeField] InputAction movement;
+    [SerializeField] InputAction fire;
 
 
-    // private void OnEnable()
-    // {
-    //    movement.Enable();
-    //  }
-
-    //  private void OnDisable()
-    //  {
-    //      movement.Disable(); 
-    // }
+    [Header("General Setup Settings")]
+    [Tooltip("How Fast ship moves")]
    [SerializeField] float XmoveSpeed = 10f;
    [SerializeField] float YmoveSpeed = 20f;
    [SerializeField] float xRange = 10f;
    [SerializeField] float yRange = 10f;
+   [SerializeField] GameObject[] lasers;
 
+    [Header("Screen position based tuning")]
     [SerializeField] float positionPitchFactor = -2f;
-    [SerializeField] float controlPitchFactor = -10f;
     [SerializeField] float positionYawFactor = 5f;
     [SerializeField] float positionRollFactor = 5f;
+
+    [Header("Player Input based tuning")]
+    [SerializeField] float controlPitchFactor = -10f;
     [SerializeField] float controlRollFactor = 15f;
 
+    
     float yThrow, xThrow;
+
+    
+
+
+    private void OnEnable()
+    {
+        fire.Enable();
+    }
+
+    private void OnDisable()
+    {
+        fire.Disable();
+    }
 
     void Update()
     {
         ProcessTranslation();
         ProcessRotation();
+        ProcessFiring();
 
     }
 
@@ -68,5 +81,31 @@ public class PlayerController : MonoBehaviour
 
         transform.localPosition = new Vector3
             (clampedXPos, clampedYPos, transform.localPosition.z);
+    }
+
+
+    void ProcessFiring()
+    {
+        if(fire.ReadValue<float>()>0.5)
+        {
+            SetLaserActive(true);
+        }
+
+        else
+        {
+            SetLaserActive(false);
+        }
+    }
+
+    private void SetLaserActive(bool isActive)
+    {
+
+       
+        foreach (GameObject laser in lasers)
+        {
+            var emissionModule = laser.GetComponent<ParticleSystem>().emission;
+            emissionModule.enabled = isActive;
+        }
+
     }
 }
